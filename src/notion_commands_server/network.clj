@@ -19,6 +19,25 @@
           :status))
     (catch Exception e (.getMessage e))))
 
+(defn append-block
+  [block parent-block-id]
+  (try
+    (let [{:keys [api-version auth-token]} request-options
+          url (h/glue-url "https://api.notion.com/v1/blocks" parent-block-id "children")]
+      (prn "Appending block with text" (h/get-todo-text block))
+      (let [response (client/patch url
+                                   {:headers {"Notion-Version" api-version
+                                              "Authorization" (str "Bearer " auth-token)
+                                              "Content-Type" "application/json"}
+                                    :body (json/write-str {:children [block]})
+                                    :cookie-policy :none
+                                    :as "UTF-8"})]
+        (prn (:status response))
+        response))
+    (catch Exception e (let [exceptionData (.getData e)]
+                         (prn (:status exceptionData))
+                         exceptionData))))
+
 
 (defn request-block-children
   [block-id]

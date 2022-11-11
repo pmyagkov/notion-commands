@@ -2,16 +2,19 @@
   (:gen-class)
   (:require [notion-commands-server.tree :as tree]
             [notion-commands-server.network :as network]
+            [notion-commands-server.helpers :as helpers]
             [clojure.zip :as z]
             [ring.adapter.jetty :refer [run-jetty]]
             [ring.util.request :refer [request-url]]
             [compojure.core :refer [POST defroutes]]
+            [compojure.handler]
             [clojure.data.json :as json]))
 
 
 (def request-options {:root-obj-id "2d3600e4696c4b64b3e0036f64fc1ecc"
                       :test-root-obj-id "8d9f87cd5b134b798ae670e3938cc19d"})
 
+(def create-todo-block-id "f9ac90d00523421fa54fc4c7260eaa8a")
 
 (defn checkbox-checked? [loc]
   (let [node (z/node loc)]
@@ -39,7 +42,7 @@
           (let [result (interleave x (map network/delete-block x))]
             result)))))
 
-(comment 
+(comment
   (clear-closed-todos)
   )
 
@@ -56,26 +59,42 @@
                      acc)))
                {:success [] :failure []})))
 
-(defn route-clear [request]
+(defn route-clear [_]
   (let [result (test-clear-closed-todos)]
     (prn "POST /clear request processed")
     {:status 200 :body (json/write-str result) :headers {"content-type" "application/json"}}
     ))
- 
-(defn route-unknown [request]
+
+(defn route-create-todo-helper [request]
+  (let [text (get (:query-params request) "text")
+        block (helpers/create-todo-block text)
+        response (network/append-block block create-todo-block-id)
+        status (:status response)]
+
+    (if (not (= 200 status)) (prn (:body response)))
+
+    {:status (:status response)}
+    ))
+
+(def route-create-todo (-> route-create-todo-helper compojure.handler/api))
+
+(defn route-unknown-helper [request]
   (prn (str (-> (:request-method request)
                 name
                 .toUpperCase) " " (request-url request) " UNKNOWN"))
   {:status 500 :body "Route Unknown" :headers {"content-type" "text/plain"}})
 
+(def route-unknown (-> route-unknown-helper compojure.handler/api))
+
 (comment
   (route-clear {}))
 
-(defroutes app 
+(defroutes app
   (POST "/clear" request (route-clear request))
+  (POST "/create-todo" request (route-create-todo request))
   route-unknown)
 
-(defonce server (run-jetty app {:port 8081 :join? false})
+(defonce server (run-jetty app {:port 80 :join? false})
   )
 
 (defn -main

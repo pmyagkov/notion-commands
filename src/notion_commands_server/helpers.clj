@@ -24,3 +24,13 @@
           ;(assoc :content content)
           ;(assoc (keyword type) content)
           ))))
+
+(defn create-todo-block [text]
+  {:type "to_do"
+   :to_do {:rich_text [{:type "text" :text {:content text}}]
+           :checked false
+           :color "default"}})
+
+(defn get-todo-text [block]
+  (-> block :to_do :rich_text (nth 0) :text :content)
+  )
