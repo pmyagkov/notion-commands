@@ -90,11 +90,19 @@
   (route-clear {}))
 
 (defroutes app
-  (POST "/clear" request (route-clear request))
-  (POST "/create-todo" request (route-create-todo request))
+  (POST "/api/v1/clear" request (route-clear request))
+  (POST "/api/v1/create-todo" request (route-create-todo request))
   route-unknown)
 
-(defonce server (run-jetty app {:port 80 :join? false})
+(def hostname (System/getenv "HOSTNAME"))
+(if (= hostname nil) (let []
+                       (prn "No 'HOSTNAME' env variable provided!")
+                       (System/exit 1)
+                       ))
+
+(prn "HOSTNAME" (System/getenv "HOSTNAME"))
+
+(defonce server (run-jetty app {:port 80 :join? false :host hostname})
   )
 
 (defn -main
