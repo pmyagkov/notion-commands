@@ -1,30 +1,56 @@
 <html>
   <head>
     <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        padding: 0;
+        margin: 0;
+        background: transparent;
+      }
       button {
+        position: relative;
         text-transform: uppercase;
-        background-color: rgb(25,25,25);
-        border: 2px solid rgb(12,12,12);
+        background-color: rgba(255, 255, 255, 0.03);
+        border: 2px solid rgba(255, 255, 255, 0.13);
         border-radius: 4px;
-        padding: 12px 24px;
-        font-size: 12px;
-        font-weight: bold;
-        color: rgba(255,255,255, 0.75);
+        padding: 0;
+
+        cursor: pointer;
       }
 
-      button.loading {
+      .loading {
+        cursor: default;
+      }
+
+      .box {
+        padding: 8px 12px;
+        font-size: 12px;
+        font-weight: bold;
+        color: rgba(255,255,255, 0.81);
+      }
+
+      .loading .background {
+        background: linear-gradient(45deg, rgb(25,25,25) 0%, rgba(255,239,0,.8) 34%, rgba(255,239,0,1) 50%, rgba(255,239,0,.8) 66%, rgb(25,25,25) 100% );
+        background-size: 800% 800%;
+        animation: gradient 3s ease infinite;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        background:
-          linear-gradient(45deg,
-            rgb(25,25,25) 0%,
-            rgba(255,239,0,.8) 34%,
-            rgba(255,239,0,1) 50%,
-            rgba(255,239,0,.8) 66%,
-            rgb(25,25,25) 100%
-            );
-        background-size: 400% 400%;
-        animation: gradient 5s ease infinite;
+        color: rgba(255,255,255, 0.81);
+      }
+
+      .absolute {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
+      }
+
+      .static {
+        position: static;
+        visibility: hidden;
       }
 
       @keyframes gradient {
@@ -40,25 +66,37 @@
       }
     </style>
     <script>
-      const buttonNode = document.querySelector('#clear-checked')
-      buttonNode?.addEventListener('click', () => {
-        buttonNode?.classList.add('loading')
-        fetch('/api/v1/clear-todos', {
-          method: 'POST'
-        })
-        .then(() => {
+      window.addEventListener('DOMContentLoaded', () => {
+        const buttonNode = document.querySelector('#clear-checked')
+        buttonNode?.addEventListener('click', () => {
+          buttonNode?.classList.add('loading')
+          buttonNode?.setAttribute('disabled', true)
+          fetch('/api/v1/cleanup', {
+            method: 'POST'
+          })
+          .then(() => {
 
-        })
-        .catch((e) => {
-          console.log(e)
-        })
-        .finally(() => {
-          buttonNode?.classList.remove('loading')
+          })
+          .catch((e) => {
+            console.log(e)
+          })
+          .finally(() => {
+            buttonNode?.removeAttribute('disabled')
+            buttonNode?.classList.remove('loading')
+          })
         })
       })
+
     </script>
   </head>
   <body>
-    <button id="clear-checked" class="loading">CLEAR CHECKED</button>
+    <button id="clear-checked">
+      <div class="box background absolute">
+        CLEAR ME
+      </div>
+      <div class="box background static">
+        CLEAR ME
+      </div>
+    </button>
   </body>
 </html>

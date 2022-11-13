@@ -61,7 +61,7 @@
                {:success [] :failure []})))
 
 (defn route-clear [_]
-  (let [result (test-clear-closed-todos)]
+  (let [result (clear-closed-todos)]
     (prn "POST /clear request processed")
     {:status 200 :body (json/write-str result) :headers {"content-type" "application/json"}}
     ))
@@ -83,7 +83,7 @@
   (prn (str (-> (:request-method request)
                 name
                 .toUpperCase) " " (request-url request) " UNKNOWN"))
-  {:status 500 :body "Route Unknown" :headers {"content-type" "text/plain"}})
+  {:status 404 :body "Route Unknown" :headers {"content-type" "text/plain"}})
 
 (def route-unknown (-> route-unknown-helper compojure.handler/api))
 
@@ -91,7 +91,7 @@
   (route-clear {}))
 
 (defroutes app
-  (POST "/api/v1/clear" request (route-clear request))
+  (POST "/api/v1/cleanup" request (route-clear request))
   (POST "/api/v1/create-todo" request (route-create-todo request))
   (route/files "/static" { :root "./public" })
   route-unknown)
