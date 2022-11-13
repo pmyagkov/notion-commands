@@ -1,0 +1,64 @@
+<html>
+  <head>
+    <style>
+      button {
+        text-transform: uppercase;
+        background-color: rgb(25,25,25);
+        border: 2px solid rgb(12,12,12);
+        border-radius: 4px;
+        padding: 12px 24px;
+        font-size: 12px;
+        font-weight: bold;
+        color: rgba(255,255,255, 0.75);
+      }
+
+      button.loading {
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background:
+          linear-gradient(45deg,
+            rgb(25,25,25) 0%,
+            rgba(255,239,0,.8) 34%,
+            rgba(255,239,0,1) 50%,
+            rgba(255,239,0,.8) 66%,
+            rgb(25,25,25) 100%
+            );
+        background-size: 400% 400%;
+        animation: gradient 5s ease infinite;
+      }
+
+      @keyframes gradient {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+    </style>
+    <script>
+      const buttonNode = document.querySelector('#clear-checked')
+      buttonNode?.addEventListener('click', () => {
+        buttonNode?.classList.add('loading')
+        fetch('/api/v1/clear-todos', {
+          method: 'POST'
+        })
+        .then(() => {
+
+        })
+        .catch((e) => {
+          console.log(e)
+        })
+        .finally(() => {
+          buttonNode?.classList.remove('loading')
+        })
+      })
+    </script>
+  </head>
+  <body>
+    <button id="clear-checked" class="loading">CLEAR CHECKED</button>
+  </body>
+</html>
