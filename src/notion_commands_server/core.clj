@@ -7,6 +7,7 @@
             [ring.adapter.jetty :refer [run-jetty]]
             [ring.util.request :refer [request-url]]
             [compojure.core :refer [POST defroutes]]
+            [compojure.route :as route]
             [compojure.handler]
             [clojure.data.json :as json]))
 
@@ -92,15 +93,13 @@
 (defroutes app
   (POST "/api/v1/clear" request (route-clear request))
   (POST "/api/v1/create-todo" request (route-create-todo request))
+  (route/files "/static" { :root "./public" })
   route-unknown)
 
 (def hostname (System/getenv "HOSTNAME"))
-(if (= hostname nil) (let []
-                       (prn "No 'HOSTNAME' env variable provided!")
-                       (System/exit 1)
-                       ))
+(if (= hostname nil) (prn "No 'HOSTNAME' env variable provided!"))
 
-(prn "HOSTNAME" (System/getenv "HOSTNAME"))
+(prn "HOSTNAME" hostname)
 
 (defonce server (run-jetty app {:port 80 :join? false :host hostname})
   )
